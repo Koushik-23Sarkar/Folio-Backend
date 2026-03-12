@@ -5,7 +5,10 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon -r dotenv/config --experimental-json-modules src/index.js"
+    "dev": "nodemon -r dotenv/config --experimental-json-modules src/index.js",
+    "docker:build": "docker build -t calmjournal .",
+    "docker:run": "docker run -p 8000:8000 --env-file .env calmjournal",
+    "docker:compose": "docker compose up --build"
   },
   "author": "",
   "license": "ISC",
