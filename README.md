@@ -9,6 +9,12 @@ generates insights about a user's mental state over time.
 
 ------------------------------------------------------------------------
 
+## Links 
+Deploy Link: [Folio](https://folio-front-end-bice.vercel.app)
+
+Github Links: [frontend](https://github.com/Koushik-23Sarkar/Folio-FrontEnd.git) /  [backend](https://github.com/Koushik-23Sarkar/Folio-Backend.git)
+
+------------------------------------------------------------------------
 # Features
 
 -   User authentication using JWT
