@@ -79,7 +79,7 @@ const publishAJournal = asyncHandler(async (req, res) => {
   return res
     .status(201)
     .json(new ApiResponse(201, journal, "Journal created successfully"));
-}); 
+});
 
 // GET /journals/:journalId
 const getJournalById = asyncHandler(async (req, res) => {
@@ -177,7 +177,7 @@ const deleteJournal = asyncHandler(async (req, res) => {
 // POST /api/journal/analyze
 // Accepts raw text directly (no journalId needed)
 const analyzeJournal = asyncHandler(async (req, res) => {
-  const { text,journalId } = req.body;
+  const { text, journalId } = req.body;
 
   if (!text?.trim()) {
     throw new ApiError(400, "Journal text is required");
@@ -186,7 +186,7 @@ const analyzeJournal = asyncHandler(async (req, res) => {
   const response = await analyzeEmotion(text);
   console.log(response);
 
-  const EmotionAnalysis = await EmotionAnalysis.create({
+  const EmotionAnalysisResult = await EmotionAnalysis.create({
     journalId: journalId,
     userId: req.user._id,
     emotion: response.emotion,
@@ -197,7 +197,7 @@ const analyzeJournal = asyncHandler(async (req, res) => {
   return res.status(200).json(
     new ApiResponse(
       200,
-        EmotionAnalysis,
+      EmotionAnalysisResult,
       "Journal analyzed successfully"
     )
   );
@@ -223,14 +223,14 @@ const getInsights = asyncHandler(async (req, res) => {
   // Most frequent emotion
   const topEmotion = await EmotionAnalysis.aggregate([
     { $match: { userId: userObjectId } },
-      {
-        $group: {
-          _id: "$emotion",
-          count: { $sum: 1 }
-        }
-      },
-      { $sort: { count: -1 } },
-      { $limit: 1 }
+    {
+      $group: {
+        _id: "$emotion",
+        count: { $sum: 1 }
+      }
+    },
+    { $sort: { count: -1 } },
+    { $limit: 1 }
   ]);
 
   // Most used ambience: ok
@@ -248,21 +248,42 @@ const getInsights = asyncHandler(async (req, res) => {
 
   // Recent keywords
   const recentKeywords = await EmotionAnalysis.aggregate([
-    { $match: { userId: userObjectId } },
-      {
-        $group: {
-          _id: "$keywords",
-          count: { $sum: 1 }
-        }
-      },
-      { $sort: { count: -1 } },
+    {
+      $match: { userId: userObjectId }
+    },
+
+    {
+      $sort: { createdAt: -1 }
+    },
+
+    {
+      $limit: 5
+    },
+
+    {
+      $unwind: "$keywords"
+    },
+
+    {
+      $group: {
+        _id: null,
+        recentKeywords: { $addToSet: "$keywords" }
+      }
+    },
+
+    {
+      $project: {
+        _id: 0,
+        recentKeywords: 1
+      }
+    }
   ]);
 
   res.json({
     totalEntries,
     topEmotion: topEmotion[0]?._id || null,
     mostUsedAmbience: mostUsedAmbience[0]?._id || null,
-    recentKeywords: recentKeywords.map(k => k._id)
+    recentKeywords: recentKeywords[0].recentKeywords
   });
 });
 
