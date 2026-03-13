@@ -1,228 +1,260 @@
-# CalmJournal
+# Folio Backend
 
-CalmJournal is a backend application that allows users to write journal entries after immersive nature sessions (forest, ocean, mountain) and analyze their emotions using an LLM.
+Folio is a backend application that allows users to write journal
+entries after immersive nature sessions (forest, ocean, mountain) and
+analyze their emotions using an LLM.
 
-The system stores journal entries, performs emotion analysis, and generates insights about a user's mental state over time.
+The system stores journal entries, performs emotion analysis, and
+generates insights about a user's mental state over time.
 
----
+------------------------------------------------------------------------
 
 # Features
 
-* User authentication (JWT)
-* Journal entry creation
-* Emotion analysis using LLM
-* User insights API
-* MongoDB database
-* Docker-based setup for easy installation
+-   User authentication using JWT
+-   Journal entry creation
+-   Emotion analysis using LLM
+-   User insights API
+-   MongoDB database
+-   Docker-based setup for easy installation
 
----
+------------------------------------------------------------------------
 
 # Tech Stack
 
-* Node.js
-* Express.js
-* MongoDB
-* Mongoose
-* Docker
-* LLM API (Gemini)
+-   Node.js
+-   Express.js
+-   MongoDB
+-   Mongoose
+-   Docker
+-   LLM API (Gemini)
 
----
+------------------------------------------------------------------------
 
 # Project Structure
 
-```
-CalmJournal/
-│
-├── Dockerfile
-├── docker-compose.yml
-├── .env.example
-├── package.json
-├── src/
-│   ├── controllers/
-│   ├── models/
-│   ├── routes/
-│   ├── middleware/
-│   └── server.js
-```
+    Folio-Backend
+    │
+    ├── docker-compose.yml
+    ├── Dockerfile
+    ├── package.json
+    ├── package-lock.json
+    ├── README.md
+    │
+    └── src
+        ├── app.js
+        ├── constants.js
+        ├── index.js
+        │
+        ├── controllers
+        │   ├── journal.controller.js
+        │   └── user.controller.js
+        │
+        ├── db
+        │   └── index.js
+        │
+        ├── middlewares
+        │   └── auth.middleware.js
+        │
+        ├── models
+        │   ├── EmotionAnalysis.model.js
+        │   ├── journal.model.js
+        │   └── user.model.js
+        │
+        ├── routes
+        │   ├── journal.routes.js
+        │   └── user.routes.js
+        │
+        ├── services
+        │   └── llm.service.js
+        │
+        └── utils
+            ├── ApiError.js
+            ├── ApiResponse.js
+            └── AsyncHandler.js
 
----
+------------------------------------------------------------------------
 
 # Prerequisites
 
 Make sure the following tools are installed:
 
-* Docker
-* Docker Compose
-* Git
+-   Docker
+-   Docker Compose
+-   Git
+-   Node.js (only required if running without Docker)
 
----
+------------------------------------------------------------------------
 
 # Installation
 
 Clone the repository
 
-```
-git clone <repository-url>
-cd CalmJournal
-```
+    git clone <repository-url>
+    cd Folio-Backend
 
----
+------------------------------------------------------------------------
 
 # Environment Variables
 
 Create a `.env` file from the example file.
 
-```
-cp .env.example .env
-```
+    cp .env.example .env
 
 Then update the values in `.env`.
 
 Example:
 
-```
-PORT=8000
+    PORT=8000
 
-MONGODB_URI=mongodb://mongodb:27017/calmjournal
+    # Database Configuration
+    # Use your MongoDB Atlas connection string or local instance
+    MONGODB_URI=mongodb://mongodb:27017
 
-CORS_ORIGIN=http://localhost:3000
+    # Security & CORS
+    # The URL of your frontend application
+    CORS_ORIGIN=http://localhost:3000
 
-ACCESS_TOKEN_SECRET=your_secret
-ACCESS_TOKEN_EXPIRY=1d
+    # Authentication (JWT)
+    # Generate strong secrets (example: openssl rand -base64 32)
+    ACCESS_TOKEN_SECRET=<your_access_token_secret>
+    ACCESS_TOKEN_EXPIRY=1d
 
-REFRESH_TOKEN_SECRET=your_secret
-REFRESH_TOKEN_EXPIRY=7d
+    REFRESH_TOKEN_SECRET=<your_refresh_token_secret>
+    REFRESH_TOKEN_EXPIRY=7d
 
-GEMINI_API_KEY=your_gemini_api_key
-```
+    # Google Gemini AI
+    # API key used for emotion analysis
+    GEMINI_API_KEY=<your_gemini_api_key>
 
----
+------------------------------------------------------------------------
 
-# Run the Application (One Command)
+# Running the Application
 
-Start the entire application using Docker.
+You can run the application in two ways.
 
-```
-docker compose up --build
-```
+------------------------------------------------------------------------
 
-This command will:
+# Option A --- Use MongoDB Atlas
 
-* Build the Node.js application image
-* Start the backend server
-* Start a MongoDB database
-* Connect the backend to MongoDB automatically
+If you already have a MongoDB Atlas database, you can run only the
+backend container.
 
----
+Make sure your `.env` file contains your Atlas connection string.
+
+Example:
+
+    MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/folio
+
+Run the application:
+
+    npm run docker:build
+    npm run docker:run
+
+These commands will:
+
+-   Build the Node.js Docker image
+-   Start the backend container
+-   Connect to MongoDB Atlas automatically
+
+------------------------------------------------------------------------
+
+# Option B --- Use MongoDB with Docker Compose
+
+If you want to run MongoDB locally using Docker.
+
+Update `.env`:
+
+    MONGODB_URI=mongodb://mongodb:27017
+
+Run:
+
+    npm run docker:compose
+
+This will:
+
+-   Build the backend Docker image
+-   Start the backend server
+-   Start a MongoDB container
+-   Automatically connect the backend to MongoDB
+
+------------------------------------------------------------------------
 
 # Access the Application
 
-After running the containers:
+After starting the containers:
 
 Backend API:
 
-```
-http://localhost:8000
-```
+    http://localhost:8000
 
-MongoDB:
-
-```
-mongodb://localhost:27017
-```
-
----
+------------------------------------------------------------------------
 
 # Stop the Application
 
-To stop the running containers:
+To stop and remove containers:
 
-```
-docker compose down
-```
+    docker compose down
 
----
+------------------------------------------------------------------------
 
-# API Endpoints
+# Important API Endpoints
 
-### Create Journal Entry
+## Create Journal Entry
 
-```
-POST /api/journal
-```
+    POST /api/journal
 
-Example request:
+Example Request
 
-```
-{
-  "ambience": "forest",
-  "text": "I felt calm today after listening to the rain."
-}
-```
+    {
+      "ambience": "forest",
+      "text": "I felt calm today after listening to the rain."
+    }
 
----
+------------------------------------------------------------------------
 
-### Analyze Emotion
+## Analyze Emotion
 
-```
-POST /api/journal/analyze
-```
+    POST /api/journal/analyze
 
-Example request:
+Example Request
 
-```
-{
-  "text": "I felt peaceful and relaxed today."
-}
-```
+    {
+      "text": "I felt peaceful and relaxed today.",
+      "journalId": "<journalId>"
+    }
 
----
+------------------------------------------------------------------------
 
-### Get User Insights
+## Get User Insights
 
-```
-GET /api/journal/insights/:userId
-```
+    GET /api/journal/insights/:userId
 
-Example response:
+Example Response
 
-```
-{
-  "totalEntries": 8,
-  "topEmotion": "calm",
-  "mostUsedAmbience": "forest",
-  "recentKeywords": ["focus", "nature", "rain"]
-}
-```
+    {
+      "totalEntries": 8,
+      "topEmotion": "calm",
+      "mostUsedAmbience": "forest",
+      "recentKeywords": ["focus", "nature", "rain"]
+    }
 
----
+------------------------------------------------------------------------
 
-# Development
-
-If you want to run the project without Docker:
+# Development (Without Docker)
 
 Install dependencies
 
-```
-npm install
-```
+    npm install
 
-Run the server
+Run the development server
 
-```
-npm start
-```
+    npm run dev
 
----
+------------------------------------------------------------------------
 
 # Author
 
-Koushik Sarkar
-B.Tech Information Technology
+**Koushik Sarkar**\
+B.Tech in Information Technology\
 MAKAUT
-
----
-
-# License
-
-This project is open-source and available under the MIT License.
